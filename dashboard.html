@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>我的专注记录 - HavenHours Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>📊 我的专注记录</h2>
+    <div id="summary"></div>
+    <div id="recordList"></div>
+    <canvas id="taskChart" width="400" height="200"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // 读取 localStorage 里的数据
+    const records = JSON.parse(localStorage.getItem("havenRecords")) || [];
+
+    // 数据统计
+    let totalSeconds = 0;
+    let taskMap = {};
+
+    records.forEach(r => {
+      const parts = r.duration.split(":");
+      const seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+      totalSeconds += seconds;
+
+      taskMap[r.taskName] = (taskMap[r.taskName] || 0) + seconds;
+    });
+
+    // 转换时间格式
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+    document.getElementById("summary").innerHTML =
+      `<p>今日累计专注：<strong>${hours}小时 ${minutes}分钟</strong></p>`;
+
+    // 任务列表展示
+    document.getElementById("recordList").innerHTML = records.map(r => `
+      <div>📝 <strong>${r.taskName}</strong>：${r.startTime} ~ ${r.endTime} (${r.duration})</div>
+    `).join("");
+
+    // 用 Chart.js 画图
+    const ctx = document.getElementById("taskChart").getContext("2d");
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: Object.keys(taskMap),
+        datasets: [{
+          label: "各任务时长（分钟）",
+          data: Object.values(taskMap).map(s => Math.floor(s / 60)),
+          backgroundColor: "rgba(75, 192, 192, 0.6)"
+        }]
+      }
+    });
+  </script>
+</body>
+</html>

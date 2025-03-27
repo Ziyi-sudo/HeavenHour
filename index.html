@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>HavenHours - 心灵港湾时间</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🌿 HavenHours</h1>
+
+    <!-- 🌿 任务名输入框 -->
+    <input type="text" id="taskName" placeholder="你正在做什么？" />
+
+    <!-- 🎯 模式切换 + 倒计时输入 -->
+    <div class="mode-select" style="margin: 10px 0;">
+      <label for="modeSelect">模式：</label>
+      <select id="modeSelect">
+        <option value="countup" selected>正计时</option>
+        <option value="countdown">倒计时</option>
+      </select>
+
+      <input type="number" id="countdownInput" placeholder="分钟" min="1" style="width: 80px; padding: 6px; border-radius: 6px; border: 1px solid #ccc;" />
+    </div>
+
+    <!-- ⏱️ 计时显示 -->
+    <div id="timer">00:00:00</div>
+
+    <!-- 🧭 控制按钮 -->
+    <div class="button-group">
+      <button id="startBtn">开始</button>
+      <button id="pauseBtn">暂停</button>
+      <button id="resetBtn">重置</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+:root {
+  --pink-soft: #F8D6E0;
+  --yellow-soft: #FFF5D1;
+  --blue-soft: #D9EFFF;
+  --white: #FFFFFF;
+  --text-dark: #333333;
+}
+
+body {
+  background-color: var(--white);
+  font-family: "Helvetica Neue", sans-serif;
+  color: var(--text-dark);
+  text-align: center;
+  padding: 40px;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  padding: 30px;
+  border-radius: 20px;
+  background-color: var(--blue-soft);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+input {
+  padding: 10px;
+  font-size: 16px;
+  width: 80%;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--pink-soft);
+}
+
+#timer {
+  font-size: 48px;
+  margin: 20px 0;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 5px;
+  font-size: 16px;
+  background-color: var(--yellow-soft);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.mode-select {
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: var(--text-dark);
+}
+select {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
