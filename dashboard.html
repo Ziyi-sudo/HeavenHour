@@ -8,51 +8,100 @@
 <body>
   <div class="container">
     <h2>📊 我的专注记录</h2>
+
+    <!-- 日期选择区 + 按钮 -->
+    <div style="margin-bottom: 1em;">
+      <label for="dateSelect">选择日期：</label>
+      <input type="date" id="dateSelect" />
+      <button id="updateBtn">查看</button>
+    </div>
+
+    <!-- 显示汇总/列表/图表的容器 -->
     <div id="summary"></div>
     <div id="recordList"></div>
     <canvas id="taskChart" width="400" height="200"></canvas>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- 先加载 Chart.js UMD -->
+  <script src="./libs/chart.umd.js"></script>
+
   <script>
-    // 读取 localStorage 里的数据
-    const records = JSON.parse(localStorage.getItem("havenRecords")) || [];
+    // 1. 读取 LocalStorage 里的所有数据
+    const allRecords = JSON.parse(localStorage.getItem("havenRecords")) || [];
 
-    // 数据统计
-    let totalSeconds = 0;
-    let taskMap = {};
+    // 用来存储图表实例，方便更新/销毁
+    let myChart;
 
-    records.forEach(r => {
-      const parts = r.duration.split(":");
-      const seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
-      totalSeconds += seconds;
+    // 获取页面元素
+    const dateInput = document.getElementById("dateSelect");
+    const updateBtn = document.getElementById("updateBtn");
 
-      taskMap[r.taskName] = (taskMap[r.taskName] || 0) + seconds;
+    // 2. 定义函数：根据选定日期来更新页面和图表
+    function updateChartForDate(selectedDate) {
+      // 筛选出选定日期的记录
+      const records = allRecords.filter(r => r.date === selectedDate);
+
+      // 计算总秒数、生成 taskMap
+      let totalSeconds = 0;
+      let taskMap = {};
+
+      records.forEach(r => {
+        const parts = r.duration.split(":");
+        const seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+        totalSeconds += seconds;
+        taskMap[r.taskName] = (taskMap[r.taskName] || 0) + seconds;
+      });
+
+      // 转换总秒数 -> 小时+分钟
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+      // 显示“累计专注”
+      document.getElementById("summary").innerHTML =
+        `<p>该日期累计专注：<strong>${hours}小时 ${minutes}分钟</strong></p>`;
+
+      // 列出所有记录
+      document.getElementById("recordList").innerHTML = records.map(r => `
+        <div>📝 <strong>${r.taskName}</strong>：${r.startTime} ~ ${r.endTime} (${r.duration})</div>
+      `).join("");
+
+      // 统计图表的数据
+      const labels = Object.keys(taskMap);
+      const data = Object.values(taskMap).map(s => Math.floor(s / 60));
+
+      // 如果已有图表，先销毁再重新创建
+      if (myChart) {
+        myChart.destroy();
+      }
+
+      // 3. 创建或更新 Chart.js 图表
+      const ctx = document.getElementById("taskChart").getContext("2d");
+      myChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            label: "各任务时长（分钟）",
+            data,
+            backgroundColor: "rgba(75, 192, 192, 0.6)"
+          }]
+        }
+      });
+    }
+
+    // 4. 页面加载后，默认选今天，并渲染
+    window.addEventListener("DOMContentLoaded", () => {
+      // input type="date" 返回 YYYY-MM-DD
+      const today = new Date().toISOString().slice(0, 10);
+      dateInput.value = today;
+      updateChartForDate(today);
     });
 
-    // 转换时间格式
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-
-    document.getElementById("summary").innerHTML =
-      `<p>今日累计专注：<strong>${hours}小时 ${minutes}分钟</strong></p>`;
-
-    // 任务列表展示
-    document.getElementById("recordList").innerHTML = records.map(r => `
-      <div>📝 <strong>${r.taskName}</strong>：${r.startTime} ~ ${r.endTime} (${r.duration})</div>
-    `).join("");
-
-    // 用 Chart.js 画图
-    const ctx = document.getElementById("taskChart").getContext("2d");
-    new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: Object.keys(taskMap),
-        datasets: [{
-          label: "各任务时长（分钟）",
-          data: Object.values(taskMap).map(s => Math.floor(s / 60)),
-          backgroundColor: "rgba(75, 192, 192, 0.6)"
-        }]
+    // 5. 如果用户点击“查看”，则根据选中的日期重新渲染
+    updateBtn.addEventListener("click", () => {
+      const selectedDate = dateInput.value; // e.g. "2025-03-27"
+      if (selectedDate) {
+        updateChartForDate(selectedDate);
       }
     });
   </script>
